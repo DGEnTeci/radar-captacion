@@ -153,41 +153,44 @@ function PropertyDetailContent({ id }: { id: string }) {
           </div>
 
           {/* Module Tab Navigation */}
-          <div className="flex items-center gap-2 mt-6 pt-5 border-t border-[#EFECE6] overflow-x-auto">
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-6 pt-5 border-t border-[#EFECE6] overflow-x-auto pb-1">
             <button
               onClick={() => setActiveTab("auditoria")}
-              className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors cursor-pointer shrink-0 ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                 activeTab === "auditoria"
                   ? "bg-[#0F533E] text-white shadow-xs"
                   : "bg-[#FAF8F5] text-[#565C62] hover:text-[#14171A] hover:bg-[#EFECE6]"
               }`}
             >
-              <FileCheck2 className="w-3.5 h-3.5" />
-              <span>1. Auditoría y Valoración</span>
+              <FileCheck2 className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">1. Auditoría y Valoración</span>
+              <span className="sm:hidden">1. Auditoría</span>
             </button>
 
             <button
               onClick={() => setActiveTab("contacto")}
-              className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors cursor-pointer shrink-0 ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                 activeTab === "contacto"
                   ? "bg-[#0F533E] text-white shadow-xs"
                   : "bg-[#FAF8F5] text-[#565C62] hover:text-[#14171A] hover:bg-[#EFECE6]"
               }`}
             >
-              <FileText className="w-3.5 h-3.5" />
-              <span>2. Reescritura y Kit de Contacto</span>
+              <FileText className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">2. Reescritura y Kit de Contacto</span>
+              <span className="sm:hidden">2. Reescritura / Kit</span>
             </button>
 
             <button
               onClick={() => setActiveTab("dossier")}
-              className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors cursor-pointer shrink-0 ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-[11px] sm:text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors cursor-pointer shrink-0 whitespace-nowrap ${
                 activeTab === "dossier"
                   ? "bg-[#0F533E] text-white shadow-xs"
                   : "bg-[#FAF8F5] text-[#565C62] hover:text-[#14171A] hover:bg-[#EFECE6]"
               }`}
             >
-              <Printer className="w-3.5 h-3.5" />
-              <span>3. Dossier de Valoración (A4)</span>
+              <Printer className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">3. Dossier de Valoración (A4)</span>
+              <span className="sm:hidden">3. Dossier A4</span>
             </button>
           </div>
         </div>
