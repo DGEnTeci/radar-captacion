@@ -61,7 +61,7 @@ export function Navbar() {
               className="flex items-center gap-2 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-white bg-[#0F533E] hover:bg-[#0A3C2D] rounded-sm transition-colors shadow-sm cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>Analizar nuevo anuncio</span>
+              <span>Agregar inmueble</span>
             </button>
           </div>
         </div>

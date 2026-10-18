@@ -112,6 +112,7 @@ export interface Property {
   imagePath: string;
   status: PropertyStatus;
   analysis: PropertyAnalysis;
+  isSample?: boolean;
 }
 
 export interface AgencyConfig {

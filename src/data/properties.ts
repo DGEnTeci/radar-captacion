@@ -365,5 +365,6 @@ export const INITIAL_PROPERTIES: Property[] = SAMPLE_PROPERTIES_DATA.map((p) => 
   return {
     ...p,
     analysis,
+    isSample: true,
   };
 });

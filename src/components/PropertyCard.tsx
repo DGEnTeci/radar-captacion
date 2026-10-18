@@ -66,9 +66,11 @@ export function PropertyCard({ property }: PropertyCardProps) {
           <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 bg-[#14171A]/85 text-white backdrop-blur-xs rounded-xs">
             {property.sourcePortal}
           </span>
-          <span className="text-[10px] font-mono tracking-wider px-2 py-0.5 bg-[#9E7D3B] text-white rounded-xs font-semibold shadow-xs">
-            Datos de ejemplo
-          </span>
+          {property.isSample && (
+            <span className="text-[10px] font-mono tracking-wider px-2 py-0.5 bg-[#9E7D3B] text-white rounded-xs font-semibold shadow-xs">
+              Datos de ejemplo
+            </span>
+          )}
         </div>
 
         {/* Image Caption Mandatory */}

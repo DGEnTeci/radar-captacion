@@ -97,8 +97,12 @@ function PropertyDetailContent({ id }: { id: string }) {
                 </span>
                 <span>•</span>
                 <span>Portal: {property.sourcePortal}</span>
-                <span>•</span>
-                <span className="text-[#9E7D3B] font-mono">Datos de ejemplo</span>
+                {property.isSample && (
+                  <>
+                    <span>•</span>
+                    <span className="text-[#9E7D3B] font-mono">Datos de ejemplo</span>
+                  </>
+                )}
               </div>
 
               <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#14171A] tracking-tight">
