@@ -22,6 +22,9 @@ interface AppContextValue {
   toasts: ToastMessage[];
   addToast: (toast: Omit<ToastMessage, "id">) => void;
   removeToast: (id: string) => void;
+  deleteProperty: (id: string) => boolean;
+  showSampleData: boolean;
+  setShowSampleData: (show: boolean) => void;
   metrics: {
     totalDetectados: number;
     comisionPotencialCop: number;
@@ -43,6 +46,7 @@ const DEFAULT_CONFIG: AgencyConfig = {
 
 const PROPERTIES_STORAGE_KEY = "radar_properties_v2";
 const CONFIG_STORAGE_KEY = "radar_agency_config_v2";
+const SHOW_SAMPLE_STORAGE_KEY = "radar_show_sample_v2";
 
 const AppContext = createContext<AppContextValue | null>(null);
 
@@ -53,7 +57,13 @@ function loadInitialProperties(): Property[] {
     if (storedProps) {
       const parsed = JSON.parse(storedProps);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        return parsed.map((p: Property) => {
+          if (p.isSample === undefined) {
+            const isDemo = INITIAL_PROPERTIES.some((init) => init.id === p.id);
+            return { ...p, isSample: isDemo };
+          }
+          return p;
+        });
       }
     }
   } catch {
@@ -78,9 +88,23 @@ function loadInitialConfig(): AgencyConfig {
   return DEFAULT_CONFIG;
 }
 
+function loadInitialShowSample(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    const val = localStorage.getItem(SHOW_SAMPLE_STORAGE_KEY);
+    if (val !== null) {
+      return val === "true";
+    }
+  } catch {
+    // Failover
+  }
+  return true;
+}
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [properties, setProperties] = useState<Property[]>(loadInitialProperties);
   const [config, setConfig] = useState<AgencyConfig>(loadInitialConfig);
+  const [showSampleData, setShowSampleDataState] = useState<boolean>(loadInitialShowSample);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Keep localStorage synchronized when properties change
@@ -100,6 +124,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       // LocalStorage failover
     }
   }, [config]);
+
+  const setShowSampleData = useCallback((show: boolean) => {
+    setShowSampleDataState(show);
+    try {
+      localStorage.setItem(SHOW_SAMPLE_STORAGE_KEY, String(show));
+    } catch {
+      // LocalStorage failover
+    }
+  }, []);
 
   const addToast = useCallback((toast: Omit<ToastMessage, "id">) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
@@ -169,6 +202,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [addToast]
   );
 
+  const deleteProperty = useCallback(
+    (id: string): boolean => {
+      const target = properties.find((p) => p.id === id);
+      if (!target) return false;
+      if (target.isSample) {
+        addToast({
+          type: "warning",
+          title: "Inmueble protegido",
+          description: "Los inmuebles de ejemplo no se pueden eliminar. Puede ocultarlos con el interruptor 'Mostrar datos de ejemplo'.",
+        });
+        return false;
+      }
+
+      setProperties((prev) => prev.filter((p) => p.id !== id));
+      addToast({
+        type: "info",
+        title: "Inmueble eliminado",
+        description: `El inmueble en ${target.barrio} ha sido retirado del radar.`,
+      });
+      return true;
+    },
+    [properties, addToast]
+  );
+
   const updateConfig = useCallback(
     (newConfig: Partial<AgencyConfig>) => {
       setConfig((prev) => ({ ...prev, ...newConfig }));
@@ -190,22 +247,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const metrics = useMemo(() => {
-    const totalDetectados = properties.length;
+    const list = showSampleData ? properties : properties.filter((p) => !p.isSample);
+    const totalDetectados = list.length;
     const rate = config.commissionPercent / 100;
-    const comisionPotencialCop = properties.reduce(
+    const comisionPotencialCop = list.reduce(
       (acc, p) => acc + Math.round(p.askingPriceCop * rate),
       0
     );
-    const dossiersEnviados = properties.filter(
+    const dossiersEnviados = list.filter(
       (p) => p.status === "dossier_enviado" || p.status === "reunion_agendada" || p.status === "captado_exclusiva"
     ).length;
-    const exclusivasCerradas = properties.filter(
+    const exclusivasCerradas = list.filter(
       (p) => p.status === "captado_exclusiva"
     ).length;
     const promedioDiasEstancados =
       totalDetectados > 0
         ? Math.round(
-            properties.reduce((acc, p) => acc + p.daysStuck, 0) / totalDetectados
+            list.reduce((acc, p) => acc + p.daysStuck, 0) / totalDetectados
           )
         : 0;
 
@@ -216,7 +274,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       exclusivasCerradas,
       promedioDiasEstancados,
     };
-  }, [properties, config.commissionPercent]);
+  }, [properties, showSampleData, config.commissionPercent]);
 
   return (
     <AppContext.Provider
@@ -226,6 +284,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updatePropertyStatus,
         updatePropertyAnalysis,
         addProperty,
+        deleteProperty,
+        showSampleData,
+        setShowSampleData,
         updateConfig,
         getPropertyById,
         toasts,

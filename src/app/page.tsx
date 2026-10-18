@@ -10,7 +10,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { AlertCircle } from "lucide-react";
 
 function RadarHome() {
-  const { properties } = useApp();
+  const { properties, showSampleData } = useApp();
 
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: "",
@@ -23,6 +23,11 @@ function RadarHome() {
   const filteredProperties = useMemo(() => {
     return properties
       .filter((p) => {
+        // Toggle sample properties
+        if (!showSampleData && p.isSample) {
+          return false;
+        }
+
         // Search query
         if (filters.searchQuery.trim()) {
           const q = filters.searchQuery.toLowerCase();
@@ -67,7 +72,7 @@ function RadarHome() {
         }
         return 0;
       });
-  }, [properties, filters]);
+  }, [properties, filters, showSampleData]);
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] flex flex-col">
@@ -91,12 +96,14 @@ function RadarHome() {
         <MetricCards />
 
         {/* Notice of Sample Data */}
-        <div className="mb-6 p-3.5 bg-[#FFFFFF] border border-[#E6E1D8] rounded-sm flex items-start gap-3">
-          <AlertCircle className="w-4 h-4 text-[#9E7D3B] shrink-0 mt-0.5" />
-          <div className="text-xs text-[#565C62] leading-relaxed">
-            <strong className="text-[#14171A] font-semibold">Aviso de transparencia:</strong> Los inmuebles, transacciones comparables y promedios por metro cuadrado mostrados corresponden a simulaciones técnicas controladas (<span className="font-mono text-[#9E7D3B] font-semibold">Datos de ejemplo</span>). Ningún dato inventado se presenta como una transacción real ni constituye avalúo formal bajo la legislación colombiana.
+        {showSampleData && (
+          <div className="mb-6 p-3.5 bg-[#FFFFFF] border border-[#E6E1D8] rounded-sm flex items-start gap-3">
+            <AlertCircle className="w-4 h-4 text-[#9E7D3B] shrink-0 mt-0.5" />
+            <div className="text-xs text-[#565C62] leading-relaxed">
+              <strong className="text-[#14171A] font-semibold">Aviso de transparencia:</strong> Los inmuebles, transacciones comparables y promedios por metro cuadrado mostrados corresponden a simulaciones técnicas controladas (<span className="font-mono text-[#9E7D3B] font-semibold">Datos de ejemplo</span>). Ningún dato inventado se presenta como una transacción real ni constituye avalúo formal bajo la legislación colombiana.
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Search, Filter and Sort controls */}
         <RadarFilterBar

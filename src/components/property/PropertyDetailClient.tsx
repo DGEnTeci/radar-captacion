@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AppProvider, useApp } from "@/context/AppContext";
 import { Navbar } from "@/components/Navbar";
 import { ToastContainer } from "@/components/ToastContainer";
@@ -19,13 +20,25 @@ import {
   Printer,
   Cpu,
   User,
+  Trash2,
 } from "lucide-react";
 
 function PropertyDetailContent({ id }: { id: string }) {
-  const { getPropertyById, updatePropertyStatus } = useApp();
+  const router = useRouter();
+  const { getPropertyById, updatePropertyStatus, deleteProperty } = useApp();
   const property = getPropertyById(id);
 
   const [activeTab, setActiveTab] = useState<"auditoria" | "contacto" | "dossier">("auditoria");
+
+  const handleDelete = () => {
+    if (!property) return;
+    if (window.confirm(`¿Está seguro de que desea eliminar permanentemente este inmueble (${property.address}) del radar?`)) {
+      const ok = deleteProperty(property.id);
+      if (ok) {
+        router.push("/");
+      }
+    }
+  };
 
   if (!property) {
     return (
@@ -138,7 +151,7 @@ function PropertyDetailContent({ id }: { id: string }) {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-semibold text-[#687076] uppercase tracking-wider">
                   Estado:
                 </span>
@@ -152,6 +165,17 @@ function PropertyDetailContent({ id }: { id: string }) {
                   <option value="reunion_agendada">Reunión agendada</option>
                   <option value="captado_exclusiva">Captado en exclusiva</option>
                 </select>
+
+                {!property.isSample && (
+                  <button
+                    onClick={handleDelete}
+                    title="Eliminar este inmueble real del radar"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Eliminar</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>

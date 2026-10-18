@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useApp } from "@/context/AppContext";
 import { Search, ArrowUpDown } from "lucide-react";
 
 export interface FilterState {
@@ -18,6 +19,7 @@ interface RadarFilterBarProps {
 }
 
 export function RadarFilterBar({ filters, onChange, resultCount }: RadarFilterBarProps) {
+  const { showSampleData, setShowSampleData } = useApp();
   const updateFilter = (key: keyof FilterState, value: string) => {
     onChange({
       ...filters,
@@ -99,13 +101,26 @@ export function RadarFilterBar({ filters, onChange, resultCount }: RadarFilterBa
         </div>
       </div>
 
-      <div className="mt-3 pt-2.5 border-t border-[#EFECE6] flex items-center justify-between text-xs text-[#687076]">
+      <div className="mt-3 pt-2.5 border-t border-[#EFECE6] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-[#687076]">
         <span>
           Mostrando <strong className="font-semibold text-[#14171A]">{resultCount}</strong> inmuebles en radar
         </span>
-        <span className="text-[11px] font-mono text-[#9E7D3B]">
-          Actualización continua de portales
-        </span>
+
+        {/* Interruptor 'Mostrar datos de ejemplo' */}
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={showSampleData}
+            onChange={(e) => setShowSampleData(e.target.checked)}
+            className="w-4 h-4 rounded-xs accent-[#0F533E] cursor-pointer"
+          />
+          <span className="text-xs text-[#14171A] font-medium">
+            Mostrar datos de ejemplo
+          </span>
+          <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#FAF8F5] border border-[#DECBA0] text-[#9E7D3B] rounded-xs font-semibold">
+            6 demo
+          </span>
+        </label>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Property, PropertyStatus } from "@/types/property";
 import { useApp } from "@/context/AppContext";
 import { formatCop, formatPricePerM2 } from "@/lib/formatters";
-import { Clock, ArrowRight, MapPin, Sparkles, User } from "lucide-react";
+import { Clock, ArrowRight, MapPin, Sparkles, User, Trash2 } from "lucide-react";
 
 interface PropertyCardProps {
   property: Property;
@@ -43,10 +43,22 @@ const STATUS_CONFIG: Record<
 };
 
 export function PropertyCard({ property }: PropertyCardProps) {
-  const { updatePropertyStatus } = useApp();
+  const { updatePropertyStatus, deleteProperty } = useApp();
 
   const statusStyle = STATUS_CONFIG[property.status];
   const oppScore = property.analysis?.opportunityScore ?? 75;
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (
+      window.confirm(
+        `¿Desea eliminar este inmueble (${property.address}) del radar de captación?`
+      )
+    ) {
+      deleteProperty(property.id);
+    }
+  };
 
   return (
     <div className="luxury-card rounded-sm overflow-hidden flex flex-col md:flex-row group">
@@ -186,13 +198,26 @@ export function PropertyCard({ property }: PropertyCardProps) {
             </select>
           </div>
 
-          <Link
-            href={`/propiedad/${property.id}`}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0F533E] hover:text-[#0A3C2D] group/btn transition-colors cursor-pointer"
-          >
-            <span>Auditoría y Dossier A4</span>
-            <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-          </Link>
+          <div className="flex items-center gap-3">
+            {!property.isSample && (
+              <button
+                onClick={handleDelete}
+                title="Eliminar inmueble del radar"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-[#828A91] hover:text-red-700 hover:bg-red-50 border border-[#E6E1D8] hover:border-red-200 rounded-sm transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span className="text-[11px] font-medium">Eliminar</span>
+              </button>
+            )}
+
+            <Link
+              href={`/propiedad/${property.id}`}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-[#0F533E] hover:text-[#0A3C2D] group/btn transition-colors cursor-pointer"
+            >
+              <span>Auditoría y Dossier A4</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+            </Link>
+          </div>
         </div>
       </div>
     </div>
