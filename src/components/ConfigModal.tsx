@@ -1,8 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useApp } from "@/context/AppContext";
-import { X, Eye, EyeOff, ShieldCheck, KeyRound, Building2, Percent, Cpu } from "lucide-react";
+import {
+  X,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  KeyRound,
+  Building2,
+  Percent,
+  Cpu,
+  Download,
+  Upload,
+  FileJson,
+} from "lucide-react";
 
 interface ConfigModalProps {
   onClose: () => void;
@@ -16,7 +28,8 @@ const MODEL_PRESETS = [
 ];
 
 export function ConfigModal({ onClose }: ConfigModalProps) {
-  const { config, updateConfig } = useApp();
+  const { config, updateConfig, exportDataBackup, importDataBackup } = useApp();
+  const backupFileInputRef = useRef<HTMLInputElement>(null);
 
   const [agencyName, setAgencyName] = useState(config.agencyName || "");
   const [agentName, setAgentName] = useState(config.agentName || "");
@@ -28,6 +41,25 @@ export function ConfigModal({ onClose }: ConfigModalProps) {
   const [isCustomModel, setIsCustomModel] = useState(!MODEL_PRESETS.some((m) => m.id === config.openRouterModel));
   const [openRouterApiKey, setOpenRouterApiKey] = useState(config.openRouterApiKey);
   const [showKey, setShowKey] = useState(false);
+
+  const handleBackupFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const content = evt.target?.result;
+      if (typeof content === "string") {
+        const res = importDataBackup(content);
+        if (res.success) {
+          onClose();
+        }
+      }
+    };
+    reader.readAsText(file, "UTF-8");
+    // Reset file input
+    e.target.value = "";
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,6 +257,47 @@ export function ConfigModal({ onClose }: ConfigModalProps) {
               <p className="text-[11px] text-[#565C62] leading-relaxed">
                 <strong className="font-semibold text-[#14171A]">Privacidad garantizada:</strong> La clave se almacena exclusivamente en este navegador (localStorage) y nunca se guarda en bases de datos externas ni se expone a terceros. Si no introduce clave, el motor local operará de forma determinista y continua.
               </p>
+            </div>
+          </div>
+
+          {/* Backup Section: Export & Import JSON */}
+          <div className="pt-4 border-t border-[#EFECE6]">
+            <div className="flex items-center gap-1.5 mb-2">
+              <FileJson className="w-3.5 h-3.5 text-[#0F533E]" />
+              <span className="text-xs font-semibold text-[#23272B] uppercase tracking-wider">
+                Respaldo y Portabilidad de Datos
+              </span>
+            </div>
+            <p className="text-[11px] text-[#687076] leading-relaxed mb-3">
+              Exporte sus inmuebles captados, estados comerciales y ajustes de la agencia en un archivo JSON portátil para transferirlos a otro equipo o conservar una copia de seguridad. Por seguridad, la clave API nunca se incluye en el archivo exportado.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={exportDataBackup}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#0F533E] bg-[#EBF5F0] hover:bg-[#D7EBDD] border border-[#C3DFD3] rounded-sm transition-colors cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Exportar respaldo (JSON)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => backupFileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#23272B] bg-[#FFFFFF] hover:bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm transition-colors cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5 text-[#687076]" />
+                <span>Importar respaldo</span>
+              </button>
+
+              <input
+                ref={backupFileInputRef}
+                type="file"
+                accept=".json,application/json"
+                className="hidden"
+                onChange={handleBackupFileSelected}
+              />
             </div>
           </div>
 

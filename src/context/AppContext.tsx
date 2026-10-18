@@ -1,8 +1,49 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback, useSyncExternalStore } from "react";
+import { z } from "zod";
 import { Property, PropertyStatus, AgencyConfig, PropertyAnalysis } from "@/types/property";
 import { INITIAL_PROPERTIES } from "@/data/properties";
+
+const BackupPayloadSchema = z.object({
+  version: z.literal(2),
+  exportedAt: z.string(),
+  agencyConfig: z.object({
+    agencyName: z.string().optional(),
+    agentName: z.string().optional(),
+    agentRole: z.string().optional(),
+    agencyPhone: z.string().optional(),
+    commissionPercent: z.number(),
+    openRouterModel: z.string().optional(),
+  }),
+  properties: z.array(
+    z.object({
+      id: z.string(),
+      city: z.enum(["Bogotá", "Medellín", "Cali", "Barranquilla", "Bucaramanga", "Cartagena"]),
+      barrio: z.string(),
+      address: z.string(),
+      ownerName: z.string(),
+      ownerPhone: z.string(),
+      askingPriceCop: z.number(),
+      m2: z.number(),
+      bedrooms: z.number(),
+      bathrooms: z.number(),
+      parkingSpots: z.number().optional(),
+      estrato: z.number().optional(),
+      adminFeeCop: z.number().optional(),
+      daysStuck: z.number(),
+      sourcePortal: z.enum(["Metrocuadrado", "Fincaraiz", "Ciencuadras"]),
+      originalListingText: z.string(),
+      detectedFlaws: z.array(z.string()),
+      barrioAvgPricePerM2: z.number(),
+      comparables: z.array(z.any()),
+      imagePath: z.string(),
+      status: z.enum(["sin_contactar", "dossier_enviado", "reunion_agendada", "captado_exclusiva"]),
+      analysis: z.any(),
+      isSample: z.boolean().optional(),
+    })
+  ),
+});
 
 export interface ToastMessage {
   id: string;
@@ -27,6 +68,8 @@ interface AppContextValue {
   deleteProperty: (id: string) => boolean;
   showSampleData: boolean;
   setShowSampleData: (show: boolean) => void;
+  exportDataBackup: () => void;
+  importDataBackup: (jsonString: string) => { success: boolean; error?: string };
   metrics: {
     totalDetectados: number;
     comisionPotencialCop: number;
@@ -285,6 +328,89 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [addToast]
   );
 
+  const exportDataBackup = useCallback(() => {
+    // Exclude openRouterApiKey from backup for security
+    const cleanConfig = {
+      agencyName: config.agencyName,
+      agentName: config.agentName,
+      agentRole: config.agentRole,
+      agencyPhone: config.agencyPhone,
+      commissionPercent: config.commissionPercent,
+      openRouterModel: config.openRouterModel,
+    };
+
+    const backupPayload = {
+      version: 2 as const,
+      exportedAt: new Date().toISOString(),
+      agencyConfig: cleanConfig,
+      properties,
+    };
+
+    const jsonStr = JSON.stringify(backupPayload, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const dateStamp = new Date().toISOString().split("T")[0];
+    link.href = url;
+    link.setAttribute("download", `respaldo_radar_captacion_${dateStamp}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    addToast({
+      type: "success",
+      title: "Respaldo exportado exitosamente",
+      description: "El archivo JSON contiene sus inmuebles, estados y configuración (sin claves secretas).",
+    });
+  }, [config, properties, addToast]);
+
+  const importDataBackup = useCallback(
+    (jsonString: string): { success: boolean; error?: string } => {
+      try {
+        const parsed = JSON.parse(jsonString);
+        const validated = BackupPayloadSchema.safeParse(parsed);
+
+        if (!validated.success) {
+          const firstError = validated.error.issues[0]?.message || "Estructura de respaldo no válida.";
+          addToast({
+            type: "warning",
+            title: "Archivo de respaldo inválido",
+            description: firstError,
+          });
+          return { success: false, error: firstError };
+        }
+
+        const data = validated.data;
+        // Merge config keeping existing local API key
+        setConfig((prev) => ({
+          ...prev,
+          ...data.agencyConfig,
+          openRouterApiKey: prev.openRouterApiKey,
+        }));
+
+        setProperties(data.properties as Property[]);
+
+        addToast({
+          type: "success",
+          title: "Respaldo restaurado",
+          description: `Se han cargado ${data.properties.length} inmuebles y los parámetros de su agencia.`,
+        });
+
+        return { success: true };
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "El archivo no contiene un JSON legible.";
+        addToast({
+          type: "warning",
+          title: "Error al leer el archivo",
+          description: msg,
+        });
+        return { success: false, error: msg };
+      }
+    },
+    [addToast]
+  );
+
   const getPropertyById = useCallback(
     (id: string) => {
       return properties.find((p) => p.id === id);
@@ -335,6 +461,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         deleteProperty,
         showSampleData,
         setShowSampleData,
+        exportDataBackup,
+        importDataBackup,
         updateConfig,
         getPropertyById,
         toasts,
