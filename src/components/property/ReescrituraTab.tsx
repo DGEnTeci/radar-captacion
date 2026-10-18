@@ -58,10 +58,22 @@ export function ReescrituraTab({ property }: ReescrituraTabProps) {
     }
   };
 
-  // Clean phone number for wa.me link (e.g. +57 300 120 4581 -> 573001204581)
-  const cleanPhone = property.ownerPhone.replace(/[^0-9]/g, "");
+  // Format Colombian phone number for wa.me:
+  // Strip non-digits; if 10 digits (e.g. 3001234567), prepend 57.
+  // If already starts with 57 and has 12 digits, keep as is.
+  const rawDigits = (property.ownerPhone || "").replace(/[^0-9]/g, "");
+  let formattedPhone = "";
+  if (rawDigits.length === 10) {
+    formattedPhone = `57${rawDigits}`;
+  } else if (rawDigits.length === 12 && rawDigits.startsWith("57")) {
+    formattedPhone = rawDigits;
+  } else if (rawDigits.length > 0) {
+    formattedPhone = rawDigits;
+  }
+
+  const hasValidPhone = Boolean(formattedPhone && formattedPhone.length >= 10);
   const encodedWaText = encodeURIComponent(whatsappMessage);
-  const waUrl = `https://wa.me/${cleanPhone}?text=${encodedWaText}`;
+  const waUrl = hasValidPhone ? `https://wa.me/${formattedPhone}?text=${encodedWaText}` : "#";
 
   return (
     <div className="space-y-8">
@@ -232,15 +244,31 @@ export function ReescrituraTab({ property }: ReescrituraTabProps) {
                 )}
               </button>
 
-              <a
-                href={waUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-[#0F533E] hover:bg-[#0A3C2D] rounded-sm transition-colors shadow-xs cursor-pointer"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-                <span>Abrir en WhatsApp Web ({property.ownerPhone})</span>
-              </a>
+              {hasValidPhone ? (
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-[#0F533E] hover:bg-[#0A3C2D] rounded-sm transition-colors shadow-xs cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Abrir en WhatsApp Web (+{formattedPhone})</span>
+                </a>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled
+                    className="flex items-center gap-2 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#828A91] bg-[#F1EFEA] border border-[#E6E1D8] rounded-sm cursor-not-allowed opacity-75"
+                    title="Número de contacto no disponible o formato inválido"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>WhatsApp no disponible</span>
+                  </button>
+                  <span className="text-[11px] text-[#A3382D] font-medium">
+                    Número de contacto no disponible para este propietario
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
