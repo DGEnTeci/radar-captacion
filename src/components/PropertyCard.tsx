@@ -199,7 +199,7 @@ export function PropertyCard({ property }: PropertyCardProps) {
           </div>
 
           <div className="flex items-center gap-3">
-            {!property.isSample && (
+            {!property.isSample && process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
               <button
                 onClick={handleDelete}
                 title="Eliminar inmueble del radar"

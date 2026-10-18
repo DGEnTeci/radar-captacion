@@ -224,41 +224,56 @@ export function ConfigModal({ onClose }: ConfigModalProps) {
             )}
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-[#23272B] uppercase tracking-wider mb-1.5 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <KeyRound className="w-3.5 h-3.5 text-[#9E7D3B]" />
-                <span>Clave API de OpenRouter (Opcional)</span>
-              </span>
-              <span className="text-[11px] font-normal text-[#828A91]">Clave de acceso OpenRouter</span>
-            </label>
-            <div className="relative">
-              <input
-                type={showKey ? "text" : "password"}
-                value={openRouterApiKey}
-                onChange={(e) => setOpenRouterApiKey(e.target.value)}
-                placeholder="Si se deja vacía, el sistema usa el motor heurístico local"
-                className="w-full px-3 py-2 pr-10 text-xs font-mono bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm focus:outline-none focus:border-[#0F533E] focus:bg-white text-[#14171A]"
-                autoComplete="off"
-                spellCheck={false}
-              />
-              <button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                className="absolute right-3 top-2.5 text-[#828A91] hover:text-[#14171A] p-0.5"
-                aria-label={showKey ? "Ocultar clave" : "Mostrar clave"}
-              >
-                {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            
-            <div className="mt-2 p-2.5 bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#0F533E] shrink-0 mt-0.5" />
-              <p className="text-[11px] text-[#565C62] leading-relaxed">
-                <strong className="font-semibold text-[#14171A]">Privacidad garantizada:</strong> La clave se almacena exclusivamente en este navegador (localStorage) y nunca se guarda en bases de datos externas ni se expone a terceros. Si no introduce clave, el motor local operará de forma determinista y continua.
+          {/* API Key configuration or Demo notice */}
+          {process.env.NEXT_PUBLIC_DEMO_MODE === "true" ? (
+            <div className="p-3.5 bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#0F533E]" />
+                <span className="text-xs font-semibold text-[#14171A] uppercase tracking-wider">
+                  Modo Demostración Activo
+                </span>
+              </div>
+              <p className="text-xs text-[#565C62] leading-relaxed">
+                El sistema está operando con el motor heurístico local de alta precisión para Colombia. No se requiere ni se utiliza clave de OpenRouter, garantizando cero consumo de créditos de IA.
               </p>
             </div>
-          </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-semibold text-[#23272B] uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-[#9E7D3B]" />
+                  <span>Clave API de OpenRouter (Opcional)</span>
+                </span>
+                <span className="text-[11px] font-normal text-[#828A91]">Clave de acceso OpenRouter</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={showKey ? "text" : "password"}
+                  value={openRouterApiKey}
+                  onChange={(e) => setOpenRouterApiKey(e.target.value)}
+                  placeholder="Si se deja vacía, el sistema usa el motor heurístico local"
+                  className="w-full px-3 py-2 pr-10 text-xs font-mono bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm focus:outline-none focus:border-[#0F533E] focus:bg-white text-[#14171A]"
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowKey(!showKey)}
+                  className="absolute right-3 top-2.5 text-[#828A91] hover:text-[#14171A] p-0.5"
+                  aria-label={showKey ? "Ocultar clave" : "Mostrar clave"}
+                >
+                  {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+
+              <div className="mt-2 p-2.5 bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm flex items-start gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#0F533E] shrink-0 mt-0.5" />
+                <p className="text-[11px] text-[#565C62] leading-relaxed">
+                  <strong className="font-semibold text-[#14171A]">Privacidad garantizada:</strong> La clave se almacena exclusivamente en este navegador (localStorage) y nunca se guarda en bases de datos externas ni se expone a terceros. Si no introduce clave, el motor local operará de forma determinista y continua.
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Backup Section: Export & Import JSON */}
           <div className="pt-4 border-t border-[#EFECE6]">

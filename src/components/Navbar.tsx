@@ -14,8 +14,19 @@ export function Navbar() {
   const [showAnalyze, setShowAnalyze] = useState(false);
   const [showImportCsv, setShowImportCsv] = useState(false);
 
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
   return (
     <>
+      {isDemoMode && (
+        <div className="no-print bg-[#0F533E] text-white text-[11px] font-mono tracking-wider uppercase text-center py-1.5 px-4 flex items-center justify-center gap-2 border-b border-[#0A3C2D]">
+          <span className="w-2 h-2 rounded-full bg-[#9E7D3B] animate-pulse" />
+          <span>Versión de demostración</span>
+          <span className="text-[#C3DFD3] lowercase tracking-normal">
+            — Motor heurístico local activado (sin consumo de API)
+          </span>
+        </div>
+      )}
       <header className="no-print bg-[#FFFFFF] border-b border-[#E6E1D8] sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Logo & Editorial Brand */}

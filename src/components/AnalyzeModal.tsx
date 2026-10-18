@@ -144,7 +144,8 @@ export function AnalyzeModal({ onClose }: AnalyzeModalProps) {
         "Content-Type": "application/json",
       };
 
-      if (config.openRouterApiKey) {
+      const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+      if (config.openRouterApiKey && !isDemoMode) {
         headers["x-openrouter-key"] = config.openRouterApiKey;
       }
 

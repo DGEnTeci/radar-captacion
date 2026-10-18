@@ -166,7 +166,7 @@ function PropertyDetailContent({ id }: { id: string }) {
                   <option value="captado_exclusiva">Captado en exclusiva</option>
                 </select>
 
-                {!property.isSample && (
+                {!property.isSample && process.env.NEXT_PUBLIC_DEMO_MODE !== "true" && (
                   <button
                     onClick={handleDelete}
                     title="Eliminar este inmueble real del radar"
