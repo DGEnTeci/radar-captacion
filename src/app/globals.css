@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-mono: var(--font-mono), monospace;
+
+  --color-ivory: #FAF8F5;
+  --color-ivory-subtle: #F3EFEA;
+  --color-stone: #E6E1D8;
+  --color-stone-light: #EFECE6;
+  --color-stone-dark: #C9C2B5;
+
+  --color-graphite-900: #14171A;
+  --color-graphite-800: #23272B;
+  --color-graphite-700: #3E4348;
+  --color-graphite-500: #687076;
+  --color-graphite-400: #939B9F;
+
+  --color-emerald-accent: #0F533E;
+  --color-emerald-hover: #0A3C2D;
+  --color-emerald-light: #EBF5F0;
+  --color-emerald-border: #C3DFD3;
+
+  --color-gold-accent: #9E7D3B;
+  --color-gold-subtle: #F9F5EC;
+  --color-gold-border: #DECBA0;
+}
+
+:root {
+  --background: #FAF8F5;
+  --foreground: #181B1E;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, .font-editorial {
+  font-family: var(--font-serif);
+}
+
+.font-metric {
+  font-family: var(--font-mono);
+}
+
+/* Custom editorial micro-interactions */
+.luxury-card {
+  background: #FFFFFF;
+  border: 1px solid #E6E1D8;
+  box-shadow: 0 1px 3px rgba(24, 27, 30, 0.04), 0 6px 16px rgba(24, 27, 30, 0.02);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.luxury-card:hover {
+  border-color: #D6CEBF;
+  box-shadow: 0 4px 12px rgba(24, 27, 30, 0.06), 0 12px 28px rgba(24, 27, 30, 0.03);
+}
+
+/* A4 Print Layout rules */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  html, body {
+    background: #FFFFFF !important;
+    color: #14171A !important;
+    font-size: 11pt;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .no-print, header, nav, footer, .app-navigation, .config-modal-backdrop {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .dossier-print-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #FFFFFF !important;
+  }
+
+  .dossier-page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .dossier-avoid-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}
