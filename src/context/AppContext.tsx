@@ -17,6 +17,7 @@ interface AppContextValue {
   updatePropertyStatus: (id: string, status: PropertyStatus) => void;
   updatePropertyAnalysis: (id: string, analysis: PropertyAnalysis) => void;
   addProperty: (property: Property) => void;
+  addProperties: (properties: Property[]) => void;
   updateConfig: (newConfig: Partial<AgencyConfig>) => void;
   getPropertyById: (id: string) => Property | undefined;
   toasts: ToastMessage[];
@@ -202,6 +203,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [addToast]
   );
 
+  const addProperties = useCallback(
+    (newProps: Property[]) => {
+      if (newProps.length === 0) return;
+      setProperties((prev) => [...newProps, ...prev]);
+
+      addToast({
+        type: "success",
+        title: "Importación completada",
+        description: `Se han incorporado ${newProps.length} inmuebles al radar comercial.`,
+      });
+    },
+    [addToast]
+  );
+
   const deleteProperty = useCallback(
     (id: string): boolean => {
       const target = properties.find((p) => p.id === id);
@@ -284,6 +299,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updatePropertyStatus,
         updatePropertyAnalysis,
         addProperty,
+        addProperties,
         deleteProperty,
         showSampleData,
         setShowSampleData,

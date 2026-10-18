@@ -3,14 +3,16 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useApp } from "@/context/AppContext";
-import { SlidersHorizontal, Plus, Compass } from "lucide-react";
+import { SlidersHorizontal, Plus, Compass, FileSpreadsheet } from "lucide-react";
 import { ConfigModal } from "./ConfigModal";
 import { AnalyzeModal } from "./AnalyzeModal";
+import { ImportCsvModal } from "./ImportCsvModal";
 
 export function Navbar() {
   const { config } = useApp();
   const [showConfig, setShowConfig] = useState(false);
   const [showAnalyze, setShowAnalyze] = useState(false);
+  const [showImportCsv, setShowImportCsv] = useState(false);
 
   return (
     <>
@@ -57,6 +59,15 @@ export function Navbar() {
             </button>
 
             <button
+              onClick={() => setShowImportCsv(true)}
+              className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold tracking-wide uppercase text-[#23272B] bg-[#FFFFFF] border border-[#E6E1D8] hover:border-[#0F533E] hover:text-[#0F533E] rounded-sm transition-colors cursor-pointer"
+              title="Importar inmuebles por archivo CSV"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5 text-[#0F533E]" />
+              <span className="hidden sm:inline">Importar CSV</span>
+            </button>
+
+            <button
               onClick={() => setShowAnalyze(true)}
               className="flex items-center gap-2 px-4 py-2 text-xs font-semibold tracking-wide uppercase text-white bg-[#0F533E] hover:bg-[#0A3C2D] rounded-sm transition-colors shadow-sm cursor-pointer"
             >
@@ -68,6 +79,7 @@ export function Navbar() {
       </header>
 
       {showConfig && <ConfigModal onClose={() => setShowConfig(false)} />}
+      {showImportCsv && <ImportCsvModal onClose={() => setShowImportCsv(false)} />}
       {showAnalyze && <AnalyzeModal onClose={() => setShowAnalyze(false)} />}
     </>
   );
