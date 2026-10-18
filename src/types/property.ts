@@ -117,7 +117,10 @@ export interface Property {
 export interface AgencyConfig {
   agencyName: string;
   agentName: string;
+  agentRole: string;
+  agencyPhone: string;
   commissionPercent: number;
   openRouterModel: string;
   openRouterApiKey: string;
 }
+

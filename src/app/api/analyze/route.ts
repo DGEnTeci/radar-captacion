@@ -39,6 +39,8 @@ const AnalyzeRequestSchema = z.object({
   model: z.string().max(100).optional(),
   agencyName: z.string().max(100).optional(),
   agentName: z.string().max(100).optional(),
+  agentRole: z.string().max(100).optional(),
+  agencyPhone: z.string().max(50).optional(),
 });
 
 // Zod schema to validate OpenRouter structured output
@@ -219,8 +221,10 @@ Portal fuente: ${input.sourcePortal || "Portal inmobiliario"}
 Texto del anuncio original del particular:
 "${input.originalListingText}"
 Promedio $/m2 del sector: ${input.barrioAvgPricePerM2 || "Calcular según mercado"}
-Agencia que contacta: ${input.agencyName || "Inmobiliaria Singular"}
-Asesor: ${input.agentName || "Consultor Patrimonial"}`;
+Agencia que contacta: ${input.agencyName?.trim() || "su agencia inmobiliaria"}
+Asesor: ${input.agentName?.trim() || "su asesor inmobiliario"}
+Cargo del asesor: ${input.agentRole?.trim() || "asesor inmobiliario"}
+Teléfono de contacto: ${input.agencyPhone?.trim() || "No especificado"}`;
 
     const openRouterResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",

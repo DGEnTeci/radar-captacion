@@ -18,8 +18,10 @@ const MODEL_PRESETS = [
 export function ConfigModal({ onClose }: ConfigModalProps) {
   const { config, updateConfig } = useApp();
 
-  const [agencyName, setAgencyName] = useState(config.agencyName);
-  const [agentName, setAgentName] = useState(config.agentName);
+  const [agencyName, setAgencyName] = useState(config.agencyName || "");
+  const [agentName, setAgentName] = useState(config.agentName || "");
+  const [agentRole, setAgentRole] = useState(config.agentRole || "");
+  const [agencyPhone, setAgencyPhone] = useState(config.agencyPhone || "");
   const [commissionPercent, setCommissionPercent] = useState(config.commissionPercent.toString());
   const [openRouterModel, setOpenRouterModel] = useState(config.openRouterModel);
   const [customModel, setCustomModel] = useState("");
@@ -33,8 +35,10 @@ export function ConfigModal({ onClose }: ConfigModalProps) {
     const finalComm = parseFloat(commissionPercent.replace(",", ".")) || 3.5;
 
     updateConfig({
-      agencyName: agencyName.trim() || "Inmobiliaria Singular",
-      agentName: agentName.trim() || "Consultor Patrimonial",
+      agencyName: agencyName.trim(),
+      agentName: agentName.trim(),
+      agentRole: agentRole.trim(),
+      agencyPhone: agencyPhone.trim(),
       commissionPercent: finalComm,
       openRouterModel: finalModel,
       openRouterApiKey: openRouterApiKey.trim(),
@@ -63,7 +67,7 @@ export function ConfigModal({ onClose }: ConfigModalProps) {
             Configuración de la Agencia
           </h2>
           <p className="text-xs text-[#687076] mt-1">
-            Personalice los datos de su firma inmobiliaria, porcentajes comerciales y conexión con el motor de IA.
+            Personalice los datos de su firma inmobiliaria, porcentajes comerciales y conexión con el motor de IA. Si deja campos vacíos, se emplearán fórmulas neutras como &ldquo;su asesor inmobiliario&rdquo;.
           </p>
         </div>
 
@@ -77,9 +81,8 @@ export function ConfigModal({ onClose }: ConfigModalProps) {
                 type="text"
                 value={agencyName}
                 onChange={(e) => setAgencyName(e.target.value)}
-                placeholder="Ej. Inmobiliaria Singular"
+                placeholder="Ej. Inmobiliaria Élite"
                 className="w-full px-3 py-2 text-sm bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm focus:outline-none focus:border-[#0F533E] focus:bg-white text-[#14171A]"
-                required
               />
             </div>
 
@@ -93,7 +96,32 @@ export function ConfigModal({ onClose }: ConfigModalProps) {
                 onChange={(e) => setAgentName(e.target.value)}
                 placeholder="Ej. Carlos Mendoza"
                 className="w-full px-3 py-2 text-sm bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm focus:outline-none focus:border-[#0F533E] focus:bg-white text-[#14171A]"
-                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#23272B] uppercase tracking-wider mb-1.5">
+                Cargo del Asesor
+              </label>
+              <input
+                type="text"
+                value={agentRole}
+                onChange={(e) => setAgentRole(e.target.value)}
+                placeholder="Ej. Consultor Patrimonial"
+                className="w-full px-3 py-2 text-sm bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm focus:outline-none focus:border-[#0F533E] focus:bg-white text-[#14171A]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#23272B] uppercase tracking-wider mb-1.5">
+                Teléfono de Contacto
+              </label>
+              <input
+                type="text"
+                value={agencyPhone}
+                onChange={(e) => setAgencyPhone(e.target.value)}
+                placeholder="Ej. +57 300 123 4567"
+                className="w-full px-3 py-2 text-sm bg-[#FAF8F5] border border-[#E6E1D8] rounded-sm focus:outline-none focus:border-[#0F533E] focus:bg-white text-[#14171A]"
               />
             </div>
           </div>

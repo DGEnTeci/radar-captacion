@@ -21,6 +21,12 @@ export function DossierTab({ property }: DossierTabProps) {
     day: "numeric",
   }).format(new Date());
 
+  const activeAgencyName = config.agencyName?.trim() || "Su Agencia Inmobiliaria";
+  const activeAgentName = config.agentName?.trim() || "Su asesor inmobiliario";
+  const activeAgentRole = config.agentRole?.trim() || "Asesor Inmobiliario";
+  const activeAgencyPhone = config.agencyPhone?.trim() || "";
+  const agencyInitial = (activeAgencyName.charAt(0) || "A").toUpperCase();
+
   const handlePrint = () => {
     window.print();
   };
@@ -58,14 +64,14 @@ export function DossierTab({ property }: DossierTabProps) {
           <div className="border-b border-[#E6E1D8] pb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-[#0F533E] text-white flex items-center justify-center rounded-xs font-serif font-bold text-xl">
-                R
+                {agencyInitial}
               </div>
               <div>
                 <span className="font-serif text-lg font-bold tracking-tight text-[#14171A] block">
-                  {config.agencyName.toUpperCase()}
+                  {activeAgencyName.toUpperCase()}
                 </span>
                 <span className="text-[10px] font-mono tracking-widest uppercase text-[#9E7D3B]">
-                  División de Gestión Patrimonial
+                  {activeAgentRole}
                 </span>
               </div>
             </div>
@@ -272,9 +278,12 @@ export function DossierTab({ property }: DossierTabProps) {
           {/* Signature and Agency Stamp */}
           <div className="pt-4 border-t border-[#E6E1D8] flex items-end justify-between text-xs">
             <div>
-              <p className="font-semibold text-[#14171A]">{config.agentName}</p>
-              <p className="text-[11px] text-[#565C62]">Consultor Inmobiliario Senior</p>
-              <p className="text-[11px] text-[#0F533E] font-medium">{config.agencyName}</p>
+              <p className="font-semibold text-[#14171A]">{activeAgentName}</p>
+              <p className="text-[11px] text-[#565C62]">{activeAgentRole}</p>
+              <p className="text-[11px] text-[#0F533E] font-medium">{activeAgencyName}</p>
+              {activeAgencyPhone && (
+                <p className="text-[10px] font-mono text-[#687076]">Tel: {activeAgencyPhone}</p>
+              )}
             </div>
 
             <div className="text-right">

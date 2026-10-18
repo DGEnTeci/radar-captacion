@@ -32,8 +32,10 @@ interface AppContextValue {
 }
 
 const DEFAULT_CONFIG: AgencyConfig = {
-  agencyName: "Inmobiliaria Singular",
-  agentName: "Carlos Mendoza",
+  agencyName: "",
+  agentName: "",
+  agentRole: "",
+  agencyPhone: "",
   commissionPercent: 3.5,
   openRouterModel: "openai/gpt-4o-mini",
   openRouterApiKey: "",

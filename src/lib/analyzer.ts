@@ -15,6 +15,8 @@ export interface ListingInputData {
   barrioAvgPricePerM2?: number;
   agencyName?: string;
   agentName?: string;
+  agentRole?: string;
+  agencyPhone?: string;
 }
 
 export const CITY_DEFAULT_M2_AVERAGES: Record<string, number> = {
@@ -147,9 +149,11 @@ export function runLocalListingAnalysis(input: ListingInputData, fallbackReason?
   const estimatedDaysOptimalPrice = Math.min(45, Math.max(20, Math.round(25 + (priceDiffPercent > 10 ? 10 : 0))));
 
   // Professional Rewrite
-  const agencyName = input.agencyName || "Inmobiliaria Singular";
-  const agentName = input.agentName || "Consultor Patrimonial";
-  const ownerName = input.ownerName || "Propietario";
+  const agencyName = input.agencyName?.trim() || "su agencia inmobiliaria";
+  const agentName = input.agentName?.trim() || "su asesor inmobiliario";
+  const agentRole = input.agentRole?.trim() || "";
+  const agencyPhone = input.agencyPhone?.trim() || "";
+  const ownerName = input.ownerName?.trim() || "Propietario";
 
   const optimizedHeadline = `Exclusivo apartamento en ${input.barrio}: luz natural, serenidad y óptima conectividad`;
   const optimizedDescription = `Ubicado en una de las zonas de mayor valorización y tranquilidad de ${input.barrio} (${input.city}), este inmueble de ${m2} m2 ofrece un equilibrio singular entre espacialidad y confort residencial.
@@ -176,8 +180,10 @@ Un inmueble ideal tanto para familias que priorizan ubicación y seguridad como 
   ];
 
   // WhatsApp icebreaker (completely honest, gives value first, no fake buyer, no pressure)
-  const portalName = input.sourcePortal || "el portal";
-  const whatsappIcebreaker = `Buenas tardes, señor(a) ${ownerName}. Le saluda ${agentName}, de ${agencyName} en ${input.city}.
+  const portalName = input.sourcePortal || "el portal inmobiliario";
+  const roleText = agentRole ? ` (${agentRole})` : "";
+  const phoneText = agencyPhone ? ` (contacto: ${agencyPhone})` : "";
+  const whatsappIcebreaker = `Buenas tardes, señor(a) ${ownerName}. Le saluda ${agentName}${roleText}, de ${agencyName} en ${input.city}${phoneText}.
 
 He seguido con interés la publicación de su apartamento en ${input.barrio} a través de ${portalName}. Observamos que lleva varias semanas en vitrina comercial sin cerrar la operación y, como especialistas en el corredor residencial de ${input.barrio}, preparamos un informe analítico comparativo con las ventas efectivas registradas en su misma cuadra durante el último trimestre.
 

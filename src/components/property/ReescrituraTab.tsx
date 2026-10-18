@@ -19,11 +19,24 @@ interface ReescrituraTabProps {
 }
 
 export function ReescrituraTab({ property }: ReescrituraTabProps) {
-  const { addToast } = useApp();
+  const { config, addToast } = useApp();
   const contactKit = property.analysis.contactKit;
   const optimized = property.analysis.optimizedListing;
 
-  const [whatsappMessage, setWhatsappMessage] = useState(contactKit.whatsappIcebreaker);
+  const activeAgency = config.agencyName?.trim() || "su agencia inmobiliaria";
+  const activeAgent = config.agentName?.trim() || "su asesor inmobiliario";
+  const activeRole = config.agentRole?.trim() ? ` (${config.agentRole.trim()})` : "";
+  const activePhone = config.agencyPhone?.trim() ? ` (contacto: ${config.agencyPhone.trim()})` : "";
+
+  const [whatsappMessage, setWhatsappMessage] = useState(() => {
+    let msg = contactKit.whatsappIcebreaker;
+    msg = msg.replace(/Inmobiliaria Singular/g, activeAgency);
+    msg = msg.replace(/Consultor Patrimonial/g, `${activeAgent}${activeRole}`);
+    if (activePhone && !msg.includes(config.agencyPhone.trim())) {
+      msg = msg.replace(activeAgency, `${activeAgency}${activePhone}`);
+    }
+    return msg;
+  });
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
 
   const copyToClipboard = async (text: string, sectionKey: string, label: string) => {
@@ -248,7 +261,7 @@ export function ReescrituraTab({ property }: ReescrituraTabProps) {
                     1. Saludo y Validación de Tiempo
                   </span>
                   <p className="text-[#23272B] italic mt-0.5">
-                    &ldquo;{contactKit.callScript.greeting}&rdquo;
+                    &ldquo;{contactKit.callScript.greeting.replace(/Inmobiliaria Singular/g, activeAgency).replace(/Consultor Patrimonial/g, activeAgent)}&rdquo;
                   </p>
                 </div>
 
@@ -283,13 +296,14 @@ export function ReescrituraTab({ property }: ReescrituraTabProps) {
 
             <div className="mt-4 pt-3 border-t border-[#E6E1D8] flex items-center justify-between">
               <button
-                onClick={() =>
+                onClick={() => {
+                  const greeting = contactKit.callScript.greeting.replace(/Inmobiliaria Singular/g, activeAgency).replace(/Consultor Patrimonial/g, activeAgent);
                   copyToClipboard(
-                    `${contactKit.callScript.greeting}\n\n${contactKit.callScript.hook}\n\n${contactKit.callScript.valueOffer}\n\n${contactKit.callScript.callToAction}`,
+                    `${greeting}\n\n${contactKit.callScript.hook}\n\n${contactKit.callScript.valueOffer}\n\n${contactKit.callScript.callToAction}`,
                     "script",
                     "Guión de llamada"
-                  )
-                }
+                  );
+                }}
                 className="text-[11px] text-[#0F533E] hover:underline flex items-center gap-1 cursor-pointer font-medium"
               >
                 <Copy className="w-3 h-3" />
