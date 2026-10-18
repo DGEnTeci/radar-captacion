@@ -7,10 +7,14 @@ import { ToastContainer } from "@/components/ToastContainer";
 import { MetricCards } from "@/components/MetricCards";
 import { RadarFilterBar, FilterState } from "@/components/RadarFilterBar";
 import { PropertyCard } from "@/components/PropertyCard";
+import { AnalyzeModal } from "@/components/AnalyzeModal";
+import { ImportCsvModal } from "@/components/ImportCsvModal";
 import { AlertCircle } from "lucide-react";
 
 function RadarHome() {
-  const { properties, showSampleData } = useApp();
+  const { properties, showSampleData, setShowSampleData } = useApp();
+  const [showAnalyzeModal, setShowAnalyzeModal] = useState(false);
+  const [showCsvModal, setShowCsvModal] = useState(false);
 
   const [filters, setFilters] = useState<FilterState>({
     searchQuery: "",
@@ -112,20 +116,83 @@ function RadarHome() {
           resultCount={filteredProperties.length}
         />
 
-        {/* Property Cards List */}
+        {/* Property Cards List or Rich Empty State */}
         <div className="space-y-4">
           {filteredProperties.length > 0 ? (
             filteredProperties.map((prop) => (
               <PropertyCard key={prop.id} property={prop} />
             ))
           ) : (
-            <div className="p-12 text-center bg-white border border-[#E6E1D8] rounded-sm">
-              <p className="font-serif text-lg text-[#14171A] font-medium">
-                No se encontraron inmuebles con los criterios seleccionados
-              </p>
-              <p className="text-xs text-[#828A91] mt-1">
-                Intente ajustar los filtros de ciudad, portal o estado de captación.
-              </p>
+            <div className="p-10 sm:p-14 text-center bg-white border border-[#E6E1D8] rounded-sm shadow-xs">
+              <div className="w-12 h-12 bg-[#FAF8F5] border border-[#E6E1D8] rounded-full flex items-center justify-center mx-auto mb-4 text-[#9E7D3B]">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+
+              {properties.length === 0 || (!showSampleData && properties.every((p) => p.isSample)) ? (
+                <>
+                  <h3 className="font-serif text-xl font-bold text-[#14171A]">
+                    No hay inmuebles visibles en el radar
+                  </h3>
+                  <p className="text-xs text-[#565C62] max-w-md mx-auto mt-2 leading-relaxed">
+                    {!showSampleData && properties.some((p) => p.isSample)
+                      ? "Los datos de ejemplo se encuentran ocultos y aún no ha incorporado inmuebles reales. Puede volver a activar los ejemplos o agregar un inmueble nuevo."
+                      : "Aún no ha incorporado inmuebles comerciales a su radar. Agregue un inmueble de forma manual o cargue una lista mediante archivo CSV."}
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
+                    {!showSampleData && properties.some((p) => p.isSample) && (
+                      <button
+                        onClick={() => setShowSampleData(true)}
+                        className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#0F533E] bg-[#EBF5F0] hover:bg-[#D7EBDD] border border-[#C3DFD3] rounded-sm transition-colors cursor-pointer"
+                      >
+                        Mostrar datos de ejemplo
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowAnalyzeModal(true)}
+                      className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-[#0F533E] hover:bg-[#0A3C2D] rounded-sm transition-colors shadow-sm cursor-pointer"
+                    >
+                      + Agregar inmueble
+                    </button>
+                    <button
+                      onClick={() => setShowCsvModal(true)}
+                      className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#23272B] bg-white border border-[#E6E1D8] hover:border-[#0F533E] hover:text-[#0F533E] rounded-sm transition-colors cursor-pointer"
+                    >
+                      Importar CSV
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <h3 className="font-serif text-xl font-bold text-[#14171A]">
+                    No se encontraron inmuebles con los criterios seleccionados
+                  </h3>
+                  <p className="text-xs text-[#565C62] max-w-md mx-auto mt-2 leading-relaxed">
+                    Ningún inmueble coincide con la búsqueda o combinación de filtros actual (ciudad, portal o estado).
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
+                    <button
+                      onClick={() =>
+                        setFilters({
+                          searchQuery: "",
+                          city: "all",
+                          status: "all",
+                          portal: "all",
+                          sortBy: "opportunity",
+                        })
+                      }
+                      className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#0F533E] bg-[#EBF5F0] hover:bg-[#D7EBDD] border border-[#C3DFD3] rounded-sm transition-colors cursor-pointer"
+                    >
+                      Restablecer filtros
+                    </button>
+                    <button
+                      onClick={() => setShowAnalyzeModal(true)}
+                      className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-[#0F533E] hover:bg-[#0A3C2D] rounded-sm transition-colors shadow-sm cursor-pointer"
+                    >
+                      + Agregar nuevo inmueble
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -146,6 +213,8 @@ function RadarHome() {
       </footer>
 
       <ToastContainer />
+      {showAnalyzeModal && <AnalyzeModal onClose={() => setShowAnalyzeModal(false)} />}
+      {showCsvModal && <ImportCsvModal onClose={() => setShowCsvModal(false)} />}
     </div>
   );
 }

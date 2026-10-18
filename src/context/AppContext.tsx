@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback, useSyncExternalStore } from "react";
 import { Property, PropertyStatus, AgencyConfig, PropertyAnalysis } from "@/types/property";
 import { INITIAL_PROPERTIES } from "@/data/properties";
 
@@ -14,6 +14,7 @@ export interface ToastMessage {
 interface AppContextValue {
   properties: Property[];
   config: AgencyConfig;
+  isHydrated: boolean;
   updatePropertyStatus: (id: string, status: PropertyStatus) => void;
   updatePropertyAnalysis: (id: string, analysis: PropertyAnalysis) => void;
   addProperty: (property: Property) => void;
@@ -51,7 +52,7 @@ const SHOW_SAMPLE_STORAGE_KEY = "radar_show_sample_v2";
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-function loadInitialProperties(): Property[] {
+function getSafeInitialProperties(): Property[] {
   if (typeof window === "undefined") return INITIAL_PROPERTIES;
   try {
     const storedProps = localStorage.getItem(PROPERTIES_STORAGE_KEY);
@@ -73,12 +74,12 @@ function loadInitialProperties(): Property[] {
   return INITIAL_PROPERTIES;
 }
 
-function loadInitialConfig(): AgencyConfig {
+function getSafeInitialConfig(): AgencyConfig {
   if (typeof window === "undefined") return DEFAULT_CONFIG;
   try {
-    const storedConfig = localStorage.getItem(CONFIG_STORAGE_KEY);
-    if (storedConfig) {
-      const parsed = JSON.parse(storedConfig);
+    const stored = localStorage.getItem(CONFIG_STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
       if (parsed && typeof parsed === "object") {
         return { ...DEFAULT_CONFIG, ...parsed };
       }
@@ -89,7 +90,7 @@ function loadInitialConfig(): AgencyConfig {
   return DEFAULT_CONFIG;
 }
 
-function loadInitialShowSample(): boolean {
+function getSafeInitialShowSample(): boolean {
   if (typeof window === "undefined") return true;
   try {
     const val = localStorage.getItem(SHOW_SAMPLE_STORAGE_KEY);
@@ -102,38 +103,14 @@ function loadInitialShowSample(): boolean {
   return true;
 }
 
+const emptySubscribe = () => () => {};
+
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [properties, setProperties] = useState<Property[]>(loadInitialProperties);
-  const [config, setConfig] = useState<AgencyConfig>(loadInitialConfig);
-  const [showSampleData, setShowSampleDataState] = useState<boolean>(loadInitialShowSample);
+  const [properties, setProperties] = useState<Property[]>(getSafeInitialProperties);
+  const [config, setConfig] = useState<AgencyConfig>(getSafeInitialConfig);
+  const [showSampleData, setShowSampleDataState] = useState<boolean>(getSafeInitialShowSample);
+  const isHydrated = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  // Keep localStorage synchronized when properties change
-  useEffect(() => {
-    try {
-      localStorage.setItem(PROPERTIES_STORAGE_KEY, JSON.stringify(properties));
-    } catch {
-      // LocalStorage failover
-    }
-  }, [properties]);
-
-  // Keep localStorage synchronized when config changes
-  useEffect(() => {
-    try {
-      localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
-    } catch {
-      // LocalStorage failover
-    }
-  }, [config]);
-
-  const setShowSampleData = useCallback((show: boolean) => {
-    setShowSampleDataState(show);
-    try {
-      localStorage.setItem(SHOW_SAMPLE_STORAGE_KEY, String(show));
-    } catch {
-      // LocalStorage failover
-    }
-  }, []);
 
   const addToast = useCallback((toast: Omit<ToastMessage, "id">) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
@@ -143,6 +120,60 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 4500);
+  }, []);
+
+  useEffect(() => {
+    // Check if corrupted data existed in localStorage on mount
+    try {
+      const rawProps = localStorage.getItem(PROPERTIES_STORAGE_KEY);
+      if (rawProps) JSON.parse(rawProps);
+    } catch {
+      setTimeout(() => {
+        addToast({
+          type: "warning",
+          title: "Almacenamiento local restablecido",
+          description: "Se detectó información corrupta en el navegador. Se cargaron los datos de ejemplo estándar.",
+        });
+      }, 100);
+    }
+  }, [addToast]);
+
+  // Keep localStorage synchronized when properties change (only after hydration)
+  useEffect(() => {
+    if (!isHydrated) return;
+    try {
+      localStorage.setItem(PROPERTIES_STORAGE_KEY, JSON.stringify(properties));
+    } catch (e: unknown) {
+      const isQuota = e instanceof DOMException && (e.code === 22 || e.name === "QuotaExceededError");
+      setTimeout(() => {
+        addToast({
+          type: "warning",
+          title: isQuota ? "Almacenamiento local lleno" : "No fue posible guardar",
+          description: isQuota
+            ? "El navegador se ha quedado sin espacio de almacenamiento para guardar más inmuebles."
+            : "El almacenamiento del navegador está bloqueado o restringido.",
+        });
+      }, 0);
+    }
+  }, [properties, isHydrated, addToast]);
+
+  // Keep localStorage synchronized when config changes (only after hydration)
+  useEffect(() => {
+    if (!isHydrated) return;
+    try {
+      localStorage.setItem(CONFIG_STORAGE_KEY, JSON.stringify(config));
+    } catch {
+      // Ignore quota or private browsing errors on config
+    }
+  }, [config, isHydrated]);
+
+  const setShowSampleData = useCallback((show: boolean) => {
+    setShowSampleDataState(show);
+    try {
+      localStorage.setItem(SHOW_SAMPLE_STORAGE_KEY, String(show));
+    } catch {
+      // local storage failover
+    }
   }, []);
 
   const removeToast = useCallback((id: string) => {
@@ -296,6 +327,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         properties,
         config,
+        isHydrated,
         updatePropertyStatus,
         updatePropertyAnalysis,
         addProperty,

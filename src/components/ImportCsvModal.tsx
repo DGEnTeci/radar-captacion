@@ -54,7 +54,9 @@ interface FailedRow {
   error: string;
 }
 
-function parseRfcCsv(text: string): string[][] {
+function parseRfcCsv(rawText: string): string[][] {
+  // Strip UTF-8 BOM if present (Excel export artifact)
+  const text = rawText.charCodeAt(0) === 0xFEFF ? rawText.slice(1) : rawText;
   const lines: string[][] = [];
   let row: string[] = [];
   let cell = "";
@@ -80,10 +82,11 @@ function parseRfcCsv(text: string): string[][] {
         row.push(cell.trim());
         cell = "";
       } else if (char === "\r") {
-        // Ignorar retornos de carro
+        // Ignorar retornos de carro de Windows (\r\n)
       } else if (char === "\n") {
         row.push(cell.trim());
-        if (row.length > 1 || (row.length === 1 && row[0] !== "")) {
+        // Filtrar filas vacías o con espacios en blanco
+        if (row.some((c) => c !== "")) {
           lines.push(row);
         }
         row = [];
@@ -96,7 +99,7 @@ function parseRfcCsv(text: string): string[][] {
 
   if (cell || row.length > 0) {
     row.push(cell.trim());
-    if (row.length > 1 || (row.length === 1 && row[0] !== "")) {
+    if (row.some((c) => c !== "")) {
       lines.push(row);
     }
   }
@@ -262,10 +265,32 @@ export function ImportCsvModal({ onClose }: ImportCsvModalProps) {
           const rawAddress = getVal(addressIdx, `Inmueble sector ${rawBarrio}`);
           const rawOwner = getVal(ownerIdx, "Propietario");
           const rawPhone = getVal(phoneIdx, "+57 300 000 0000");
-          const rawM2 = parseFloat(getVal(m2Idx, "100").replace(/[^0-9.]/g, "")) || 0;
+
+          // Clean area (e.g. "120 m²" or "120,5")
+          const m2Str = getVal(m2Idx, "100").replace(/m[²2]/gi, "").replace(",", ".").replace(/[^0-9.]/g, "");
+          const rawM2 = parseFloat(m2Str) || 0;
+
           const rawBeds = parseInt(getVal(bedsIdx, "3").replace(/[^0-9]/g, ""), 10);
-          const rawBaths = parseFloat(getVal(bathsIdx, "2").replace(/[^0-9.]/g, ""));
-          const rawPrice = parseFloat(getVal(priceIdx, "0").replace(/[^0-9.]/g, "")) || 0;
+          const rawBaths = parseFloat(getVal(bathsIdx, "2").replace(",", ".").replace(/[^0-9.]/g, ""));
+
+          // Clean price: strips "$", COP, dots (thousand separators like 980.000.000) or commas
+          // If price is written like "980.000.000" or "$980.000.000 COP", remove dots as separators
+          let priceStr = getVal(priceIdx, "0").replace(/[$COP\s]/gi, "");
+          if (priceStr.includes(".") && !priceStr.includes(",")) {
+            // E.g. "980.000.000" or "980.500" -> remove dots if more than 2 digits after dot or multiple dots
+            const dotParts = priceStr.split(".");
+            if (dotParts.length > 2 || (dotParts.length === 2 && dotParts[1].length === 3)) {
+              priceStr = priceStr.replace(/\./g, "");
+            }
+          } else if (priceStr.includes(",") && priceStr.includes(".")) {
+            // "980.000.000,00"
+            priceStr = priceStr.replace(/\./g, "").replace(",", ".");
+          } else if (priceStr.includes(",")) {
+            // E.g. "980000000,00"
+            priceStr = priceStr.replace(",", ".");
+          }
+          const rawPrice = parseFloat(priceStr.replace(/[^0-9.]/g, "")) || 0;
+
           const rawDays = parseInt(getVal(daysIdx, "30").replace(/[^0-9]/g, ""), 10);
           const rawPortal = getVal(portalIdx, "Metrocuadrado");
           const rawText = getVal(textIdx);
@@ -351,8 +376,12 @@ export function ImportCsvModal({ onClose }: ImportCsvModalProps) {
             },
           ];
 
+          const uniqueId = typeof crypto !== "undefined" && crypto.randomUUID
+            ? `prop-csv-${crypto.randomUUID()}`
+            : `prop-csv-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 9)}`;
+
           const newProp: Property = {
-            id: `prop-csv-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 6)}`,
+            id: uniqueId,
             city: valid.city,
             barrio: valid.barrio,
             address: valid.address,

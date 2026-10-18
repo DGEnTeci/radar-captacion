@@ -247,8 +247,12 @@ export function AnalyzeModal({ onClose }: AnalyzeModalProps) {
         Cartagena: "/images/properties/cartagena-bocagrande.jpg",
       };
 
+      const uniquePropertyId = typeof crypto !== "undefined" && crypto.randomUUID
+        ? `prop-manual-${crypto.randomUUID()}`
+        : `prop-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
       const newProperty: Property = {
-        id: `prop-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        id: uniquePropertyId,
         city: valid.city,
         barrio: valid.barrio,
         address: valid.address,
