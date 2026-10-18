@@ -8,13 +8,20 @@ export function generateStaticParams() {
   }));
 }
 
-export default async function PropertyDetailPage({
+async function PropertyDetailResolver({
+  paramsPromise,
+}: {
+  paramsPromise: Promise<{ id: string }>;
+}) {
+  const { id } = await paramsPromise;
+  return <PropertyDetailClient id={id} />;
+}
+
+export default function PropertyDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-
   return (
     <Suspense
       fallback={
@@ -23,7 +30,8 @@ export default async function PropertyDetailPage({
         </div>
       }
     >
-      <PropertyDetailClient id={id} />
+      <PropertyDetailResolver paramsPromise={params} />
     </Suspense>
   );
 }
+
