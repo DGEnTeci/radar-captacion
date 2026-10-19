@@ -101,6 +101,7 @@ export function DossierTab({ property }: DossierTabProps) {
               src={property.imagePath}
               alt={`Apartamento en ${property.barrio}`}
               fill
+              sizes="(max-width: 768px) 100vw, 800px"
               className="object-cover"
               priority
             />
