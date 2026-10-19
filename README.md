@@ -111,6 +111,46 @@ La plantilla oficial puede descargarse directamente desde el botón **"Importar 
 
 ---
 
+## Publicar la demo
+
+Siga estos pasos exactos para desplegar la versión de demostración en la nube de Vercel de manera privada y segura:
+
+### 1. Crear un repositorio privado en GitHub
+1. Inicie sesión en [GitHub](https://github.com/) y haga clic en **New repository** (o visite `https://github.com/new`).
+2. Asígnele un nombre (por ejemplo, `radar-captacion`).
+3. Seleccione la opción **Private** (Privado) para proteger el código fuente.
+4. Deje las casillas de inicialización (README, .gitignore, licencia) desmarcadas y haga clic en **Create repository**.
+
+### 2. Conectar el repositorio remoto y subir el código
+En su terminal local, dentro del directorio del proyecto, configure el origen remoto y suba la rama `master`:
+
+```bash
+# Si aún no tiene configurado el remoto 'origin':
+git remote add origin https://github.com/SU_USUARIO/radar-captacion.git
+
+# O si ya existe 'origin' y desea actualizarlo:
+git remote set-url origin https://github.com/SU_USUARIO/radar-captacion.git
+
+# Subir la rama principal a GitHub:
+git push -u origin master
+```
+
+### 3. Importar el proyecto en Vercel
+1. Inicie sesión en su cuenta de [Vercel](https://vercel.com/).
+2. Haga clic en **"Add New..."** > **"Project"**.
+3. Seleccione su cuenta de GitHub y busque el repositorio privado `radar-captacion`.
+4. Haga clic en **Import**.
+
+### 4. Configurar variables de entorno y desplegar
+1. En la sección **Build and Output Settings**, Vercel detectará automáticamente Next.js y pnpm gracias a la configuración de `packageManager` en `package.json`.
+2. Despliegue el acordeón **Environment Variables** y agregue la siguiente variable:
+   - **Key:** `NEXT_PUBLIC_DEMO_MODE`
+   - **Value:** `true`
+3. Haga clic en el botón **Deploy**.
+4. Una vez finalizada la compilación (aproximadamente 1 minuto), Vercel le proporcionará una URL pública (ejemplo: `https://radar-captacion.vercel.app`). La demo cargará con la franja de demostración, el motor heurístico local activo y la directiva `noindex, nofollow` para evitar indexación en motores de búsqueda.
+
+---
+
 ## Limitaciones Actuales
 
 1. **Almacenamiento en el navegador (`localStorage`):**
