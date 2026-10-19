@@ -23,10 +23,54 @@ const monoFont = JetBrains_Mono({
   display: "swap",
 });
 
+const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
 export const metadata: Metadata = {
-  title: "Radar de Captación | Inteligencia Inmobiliaria para Agencias",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
+  ),
+  title: "Radar de Captación | Inteligencia de captación inmobiliaria",
   description:
-    "Detección y auditoría de apartamentos de particulares estancados en portales inmobiliarios colombianos. Valoración por m2 y dossiers editoriales de captación en exclusiva.",
+    "Plataforma B2B de inteligencia de mercado inmobiliario y captación en exclusiva de inmuebles para agencias en Colombia. Detección de inmuebles estancados y dossiers de valoración profesional.",
+  icons: {
+    icon: "/favicon.ico",
+  },
+  openGraph: {
+    title: "Radar de Captación | Inteligencia de captación inmobiliaria",
+    description:
+      "Plataforma B2B de inteligencia de mercado inmobiliario y captación en exclusiva de inmuebles para agencias en Colombia.",
+    type: "website",
+    locale: "es_CO",
+    siteName: "Radar de Captación",
+    images: [
+      {
+        url: "/images/properties/bogota-chapinero.jpg",
+        width: 1200,
+        height: 800,
+        alt: "Radar de Captación - Inteligencia inmobiliaria en Colombia",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Radar de Captación | Inteligencia de captación inmobiliaria",
+    description:
+      "Plataforma B2B de inteligencia de mercado inmobiliario y captación en exclusiva de inmuebles para agencias en Colombia.",
+    images: ["/images/properties/bogota-chapinero.jpg"],
+  },
+  ...(isDemoMode
+    ? {
+        robots: {
+          index: false,
+          follow: false,
+          googleBot: {
+            index: false,
+            follow: false,
+          },
+        },
+      }
+    : {}),
 };
 
 export default function RootLayout({
