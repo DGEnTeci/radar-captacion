@@ -173,6 +173,17 @@ export async function POST(req: NextRequest) {
 
   const input = parsedInput.data;
 
+  // En modo demo, forzar siempre el motor local heurístico sin conectar con OpenRouter
+  const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  if (isDemoMode) {
+    const localResult = runLocalListingAnalysis(input, "Modo demostración activo");
+    return NextResponse.json({
+      engine: "local",
+      fallbackReason: "Modo demostración activo. Motor heurístico local determinista.",
+      data: localResult,
+    });
+  }
+
   // Retrieve OpenRouter key strictly without ever logging or exposing it
   const headerKey = req.headers.get("x-openrouter-key")?.trim();
   const envKey = process.env.OPENROUTER_API_KEY?.trim();
