@@ -143,11 +143,16 @@ git push -u origin master
 
 ### 4. Configurar variables de entorno y desplegar
 1. En la sección **Build and Output Settings**, Vercel detectará automáticamente Next.js y pnpm gracias a la configuración de `packageManager` en `package.json`.
-2. Despliegue el acordeón **Environment Variables** y agregue la siguiente variable:
-   - **Key:** `NEXT_PUBLIC_DEMO_MODE`
-   - **Value:** `true`
+2. Despliegue el acordeón **Environment Variables** y agregue las siguientes dos variables antes del primer despliegue:
+   - **Variable 1:**
+     - **Key:** `NEXT_PUBLIC_DEMO_MODE`
+     - **Value:** `true`
+   - **Variable 2:**
+     - **Key:** `NEXT_PUBLIC_SITE_URL`
+     - **Value:** `https://radar-captacion.vercel.app` *(o el subdominio que planee asignarle a su proyecto)*
 3. Haga clic en el botón **Deploy**.
-4. Una vez finalizada la compilación (aproximadamente 1 minuto), Vercel le proporcionará una URL pública (ejemplo: `https://radar-captacion.vercel.app`). La demo cargará con la franja de demostración, el motor heurístico local activo y la directiva `noindex, nofollow` para evitar indexación en motores de búsqueda.
+4. Una vez finalizada la compilación (aproximadamente 1 minuto), Vercel le proporcionará una URL pública definitiva (ejemplo: `https://radar-captacion-tu-usuario.vercel.app`).
+5. **Ajuste fino de Open Graph (Redeploy):** Si la URL definitiva otorgada por Vercel es diferente a la estimada, vaya a **Settings** > **Environment Variables** en Vercel, edite el valor de `NEXT_PUBLIC_SITE_URL` con la URL exacta asignada, y realice un **Redeploy** (desde la pestaña *Deployments* > menú de tres puntos `...` > *Redeploy*) para que las tarjetas de WhatsApp y redes sociales resuelvan la imagen de portada con la URL absoluta definitiva. La demo cargará con la franja superior de demostración, el motor heurístico local determinista activo y la directiva `noindex, nofollow` para evitar indexación en motores de búsqueda.
 
 ---
 

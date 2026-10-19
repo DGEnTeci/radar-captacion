@@ -24,12 +24,10 @@ const monoFont = JetBrains_Mono({
 });
 
 const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
-  ),
+  metadataBase: new URL(siteUrl),
   title: "Radar de Captación | Inteligencia de captación inmobiliaria",
   description:
     "Plataforma B2B de inteligencia de mercado inmobiliario y captación en exclusiva de inmuebles para agencias en Colombia. Detección de inmuebles estancados y dossiers de valoración profesional.",
@@ -45,9 +43,9 @@ export const metadata: Metadata = {
     siteName: "Radar de Captación",
     images: [
       {
-        url: "/images/properties/bogota-chapinero.jpg",
+        url: "/og-image.jpg",
         width: 1200,
-        height: 800,
+        height: 630,
         alt: "Radar de Captación - Inteligencia inmobiliaria en Colombia",
       },
     ],
@@ -57,7 +55,7 @@ export const metadata: Metadata = {
     title: "Radar de Captación | Inteligencia de captación inmobiliaria",
     description:
       "Plataforma B2B de inteligencia de mercado inmobiliario y captación en exclusiva de inmuebles para agencias en Colombia.",
-    images: ["/images/properties/bogota-chapinero.jpg"],
+    images: ["/og-image.jpg"],
   },
   ...(isDemoMode
     ? {
